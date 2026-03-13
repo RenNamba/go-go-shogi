@@ -1,13 +1,24 @@
 import { GAME_STATUS } from '../game/constants.js';
 
-export default function GameOverDialog({ gameStatus, onClose }) {
+export default function GameOverDialog({ gameStatus, mode, playerSide, onClose }) {
   let message = '';
-  if (gameStatus === GAME_STATUS.SENTE_WIN) {
-    message = '☗ 先手の勝ち！';
-  } else if (gameStatus === GAME_STATUS.GOTE_WIN) {
-    message = '☖ 後手の勝ち！';
-  } else if (gameStatus === GAME_STATUS.DRAW) {
+
+  if (gameStatus === GAME_STATUS.DRAW) {
     message = '引き分け';
+  } else if (mode === 'cpu') {
+    // CPU対戦: 「あなた」「CPU」を表示
+    const winnerSide = gameStatus === GAME_STATUS.SENTE_WIN ? 'sente' : 'gote';
+    const winnerIcon = winnerSide === 'sente' ? '☗' : '☖';
+    const winnerLabel = winnerSide === 'sente' ? '先手' : '後手';
+    const winnerRole = winnerSide === playerSide ? 'あなた' : 'CPU';
+    message = `${winnerIcon} ${winnerLabel}（${winnerRole}）の勝ち！`;
+  } else {
+    // 2人対戦
+    if (gameStatus === GAME_STATUS.SENTE_WIN) {
+      message = '☗ 先手の勝ち！';
+    } else if (gameStatus === GAME_STATUS.GOTE_WIN) {
+      message = '☖ 後手の勝ち！';
+    }
   }
 
   return (
