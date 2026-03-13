@@ -67,11 +67,38 @@
 
 ### 2.7 勝利条件
 - 相手の玉を**詰み**にした方の勝ち（合法手がない状態）
-- **千日手**: 同一局面が4回出現した場合、**後手の勝ち**
+- **千日手**: 同一局面が4回出現した場合の処理はルール設定で変更可能
+  - デフォルト: **後手の勝ち**
+  - 選択肢: 後手の勝ち / 引き分け
 
 ---
 
-## 3. 技術スタック
+## 3. デザイン方針
+
+### 3.1 全体テーマ
+- **和風・木目調**: 盤面は木目テクスチャ（CSSグラデーションで表現）
+- **明るいトーン**: ライト基調の和風カラーパレット
+- 効果音・アニメーションは不要
+
+### 3.2 盤面・駒
+- 盤面: 木目調の暖かい色合い（CSS グラデーションで木目を再現）
+- 駒: **五角形の駒型背景** + 漢字テキスト
+  - CSSの `clip-path` で五角形を描画
+  - 先手は正立、後手は180°回転
+  - 成り駒は赤色で表示
+- フォント: **明朝体**（`"Noto Serif JP"` 等のWebフォント使用）
+
+### 3.3 カラーパレット（参考）
+- 盤面背景: 木目調（`#d4a76a` 〜 `#c8945a` 系）
+- マス目の線: 濃い茶色（`#8b6914`）
+- 駒の背景: 淡い木色（`#f0d9a0`）
+- 駒のテキスト: 黒（`#1a1a1a`）、成り駒は赤（`#c0392b`）
+- UI背景: 和紙風の淡いベージュ（`#f5f0e1`）
+- アクセント: 渋い朱色・金色
+
+---
+
+## 4. 技術スタック
 
 | 項目 | 技術 |
 |---|---|
@@ -80,17 +107,20 @@
 | スタイリング | vanilla CSS（軽量さ重視） |
 | 言語 | JavaScript (JSX) |
 | 盤面描画 | DOM + CSS Grid |
+| 駒描画 | CSS `clip-path`（五角形）+ 明朝体フォント |
 | CPU AI | ミニマックス法 + アルファベータ枝刈り |
 
 ---
 
-## 4. プロジェクト構成
+## 5. プロジェクト構成
 
 ```
 go-go-shogi/
 ├── index.html
 ├── package.json
 ├── vite.config.js
+├── doc/
+│   └── implementation-plan.md      # 本計画書
 ├── src/
 │   ├── main.jsx                    # エントリーポイント
 │   ├── App.jsx                     # ルートコンポーネント（画面遷移管理）
@@ -99,15 +129,21 @@ go-go-shogi/
 │   │   ├── Board.jsx               # 5×5盤面の描画（CSS Grid）
 │   │   ├── Board.css
 │   │   ├── Cell.jsx                # 各マスのコンポーネント（タップ受付）
-│   │   ├── Piece.jsx               # 駒の表示（漢字、向き）
+│   │   ├── Piece.jsx               # 駒の表示（五角形＋漢字、向き）
 │   │   ├── Piece.css
 │   │   ├── Hand.jsx                # 持ち駒エリア
 │   │   ├── Hand.css
 │   │   ├── GameInfo.jsx            # 手番表示・ステータスバー
 │   │   ├── PromotionDialog.jsx     # 成り確認ダイアログ
-│   │   ├── GameOverDialog.jsx      # 終局ダイアログ（勝敗表示+リセット）
+│   │   ├── GameOverDialog.jsx      # 終局ダイアログ（勝敗表示+再対局/タイトル）
+│   │   ├── MenuModal.jsx           # メニューモーダル（再対局・タイトルに戻る）
+│   │   ├── MenuModal.css
 │   │   ├── ModeSelect.jsx          # タイトル画面（モード選択）
 │   │   ├── ModeSelect.css
+│   │   ├── CpuSetup.jsx            # CPU対戦設定画面（先手/後手選択）
+│   │   ├── CpuSetup.css
+│   │   ├── RuleSettings.jsx        # ルール設定画面
+│   │   ├── RuleSettings.css
 │   │   ├── RulesModal.jsx          # ルール説明モーダル
 │   │   └── RulesModal.css
 │   ├── game/
@@ -121,9 +157,9 @@ go-go-shogi/
 
 ---
 
-## 5. 画面設計
+## 6. 画面設計
 
-### 5.1 タイトル画面（ModeSelect）
+### 6.1 タイトル画面（ModeSelect）
 ```
 ┌──────────────────────────┐
 │                          │
@@ -136,16 +172,56 @@ go-go-shogi/
 │    │   CPU対戦         │  │
 │    └──────────────────┘  │
 │    ┌──────────────────┐  │
-│    │   ルール          │  │
+│    │   ルール設定       │  │
+│    └──────────────────┘  │
+│    ┌──────────────────┐  │
+│    │   遊び方          │  │
 │    └──────────────────┘  │
 │                          │
 └──────────────────────────┘
 ```
 
-### 5.2 ゲーム画面
+### 6.2 CPU対戦設定画面（CpuSetup）
 ```
 ┌──────────────────────────┐
-│ ☗ 5五将棋   [?] [✕]     │  ← ヘッダー（?=ルール、✕=タイトルに戻る）
+│                          │
+│       CPU対戦設定         │
+│                          │
+│   あなたの手番:           │
+│    (●) 先手（☗）         │
+│    ( ) 後手（☖）         │
+│                          │
+│    ┌──────────────────┐  │
+│    │   対局開始         │  │
+│    └──────────────────┘  │
+│    ┌──────────────────┐  │
+│    │   戻る            │  │
+│    └──────────────────┘  │
+│                          │
+└──────────────────────────┘
+```
+
+### 6.3 ルール設定画面（RuleSettings）
+```
+┌──────────────────────────┐
+│                          │
+│       ルール設定          │
+│                          │
+│   千日手:                 │
+│    (●) 後手の勝ち         │
+│    ( ) 引き分け           │
+│                          │
+│    ┌──────────────────┐  │
+│    │   戻る            │  │
+│    └──────────────────┘  │
+│                          │
+└──────────────────────────┘
+```
+
+### 6.4 ゲーム画面
+```
+┌──────────────────────────┐
+│ ☗ 5五将棋   [?] [≡]     │  ← ヘッダー（?=ルール、≡=メニュー）
 ├──────────────────────────┤
 │ ☖ 後手  持駒: 銀 歩      │  ← 後手の持ち駒エリア
 ├──────────────────────────┤
@@ -167,21 +243,40 @@ go-go-shogi/
 └──────────────────────────┘
 ```
 
-### 5.3 ルールモーダル（RulesModal）
-- タイトル画面の「ルール」ボタン、ゲーム画面の「?」ボタンから開く
+### 6.5 メニューモーダル（MenuModal）
+```
+┌──────────────────────────┐
+│                          │
+│         メニュー          │
+│                          │
+│    ┌──────────────────┐  │
+│    │   再対局          │  │
+│    └──────────────────┘  │
+│    ┌──────────────────┐  │
+│    │   タイトルに戻る   │  │
+│    └──────────────────┘  │
+│    ┌──────────────────┐  │
+│    │   閉じる          │  │
+│    └──────────────────┘  │
+│                          │
+└──────────────────────────┘
+```
+
+### 6.6 ルールモーダル（RulesModal）
+- タイトル画面の「遊び方」ボタン、ゲーム画面の「?」ボタンから開く
 - 内容:
   - 基本ルール（盤面・勝利条件）
   - 駒の動き方（図付き）
   - 成りのルール
   - 持ち駒の使い方
-  - 特殊ルール（二歩禁止、打ち歩詰め禁止、千日手は後手勝ち）
+  - 特殊ルール（二歩禁止、打ち歩詰め禁止、千日手）
 - スクロール可能なモーダル、「閉じる」ボタン付き
 
 ---
 
-## 6. データ構造設計
+## 7. データ構造設計
 
-### 6.1 盤面データ（5×5の2次元配列）
+### 7.1 盤面データ（5×5の2次元配列）
 ```js
 // board[row][col] - row: 0-4 (一段〜五段), col: 0-4 (5筋〜1筋)
 // 各マスは null（空）or { type, owner, promoted }
@@ -192,7 +287,7 @@ go-go-shogi/
 }
 ```
 
-### 6.2 ゲーム状態（useGame フック）
+### 7.2 ゲーム状態（useGame フック）
 ```js
 {
   board: [5][5],              // 盤面
@@ -204,18 +299,26 @@ go-go-shogi/
   selectedCell: null,          // 選択中のマス { row, col } or null
   selectedHand: null,          // 選択中の持ち駒 { type } or null
   legalMoves: [],              // 現在の合法移動先
-  gameStatus: 'playing',       // 'playing' | 'sente_win' | 'gote_win'
+  gameStatus: 'playing',       // 'playing' | 'sente_win' | 'gote_win' | 'draw'
   mode: null,                  // 'pvp' | 'cpu'
+  playerSide: 'sente',        // CPU対戦時のプレイヤー側（'sente' | 'gote'）
   positionHistory: [],         // 局面履歴（千日手判定用）
   moveCount: 0                 // 手数
 }
 ```
 
+### 7.3 ルール設定
+```js
+{
+  repetitionRule: 'gote_win'   // 'gote_win' | 'draw'
+}
+```
+
 ---
 
-## 7. 実装ステップ（詳細）
+## 8. 実装ステップ（詳細）
 
-### Step 1: プロジェクト初期化
+### Step 1: プロジェクト初期化 ✅ 完了
 1. `go-go-shogi/` フォルダ作成
 2. `npm create vite@latest . -- --template react` でプロジェクト生成
 3. 不要ファイル削除、基本構成整備
@@ -247,27 +350,33 @@ go-go-shogi/
 6. **成り判定**:
    - 成れるかどうか（敵陣への出入り）
    - 強制成り判定（行き所のない駒）
-7. **千日手判定**: 盤面のハッシュを記録し、4回同一局面で後手勝ち
+7. **千日手判定**: 盤面のハッシュを記録し、4回同一局面で設定に応じた処理
 8. **局面ハッシュ生成**: 盤面+持ち駒+手番をキーにした文字列
 
 ### Step 5: UI実装
-1. **ModeSelect**: タイトル画面（モード選択ボタン3つ）
-2. **Board**: CSS Gridで5×5盤面描画
-   - 盤のマス目の色分け
+1. **ModeSelect**: タイトル画面（モード選択ボタン4つ）
+2. **CpuSetup**: CPU対戦設定画面（先手/後手選択）
+3. **RuleSettings**: ルール設定画面（千日手ルール切替）
+4. **Board**: CSS Gridで5×5盤面描画
+   - 木目調の盤面（CSSグラデーション）
+   - マス目の線描画
    - 筋と段の番号表示
-3. **Cell**: 各マスのタップイベント処理
+5. **Cell**: 各マスのタップイベント処理
    - 選択状態のハイライト
    - 移動可能マスのハイライト（半透明の丸印）
-4. **Piece**: 駒の漢字表示
-   - 先手は上向き（正立）、後手は下向き（180°回転）
+6. **Piece**: 駒の表示
+   - CSS `clip-path` で五角形の駒型背景
+   - 明朝体フォントで漢字表示
+   - 先手は正立、後手は180°回転
    - 成り駒は赤色で表示
-5. **Hand**: 持ち駒エリア
+7. **Hand**: 持ち駒エリア
    - タップで持ち駒を選択→空きマスをタップで打ち込み
    - 駒の種類と枚数を表示
-6. **GameInfo**: 手番表示バー
-7. **PromotionDialog**: 「成りますか？」ダイアログ（はい/いいえ）
-8. **GameOverDialog**: 勝敗表示 + 「もう一度」「タイトルに戻る」ボタン
-9. **RulesModal**: ルール説明画面
+8. **GameInfo**: 手番表示バー
+9. **PromotionDialog**: 「成りますか？」ダイアログ（はい/いいえ）
+10. **GameOverDialog**: 勝敗表示 + 「もう一度」「タイトルに戻る」ボタン
+11. **MenuModal**: メニューモーダル（再対局・タイトルに戻る・閉じる）
+12. **RulesModal**: ルール説明画面
 
 ### Step 6: ゲームフロー実装（`useGame.js`）
 1. ゲーム状態の初期化
@@ -277,9 +386,9 @@ go-go-shogi/
    - 成り判定 → PromotionDialog表示
    - 王手チェック
    - 詰みチェック → GameOverDialog表示
-   - 千日手チェック
+   - 千日手チェック（設定に応じた処理）
    - 手番交代
-5. CPU対戦モード時: 後手の手番でCPU思考を実行
+5. CPU対戦モード時: CPUの手番でCPU思考を実行（先手/後手どちらでも対応）
 
 ### Step 7: CPU対戦AI（`cpu.js`）
 1. **ミニマックス法 + アルファベータ枝刈り**
@@ -301,7 +410,7 @@ go-go-shogi/
 
 ---
 
-## 8. 操作フロー
+## 9. 操作フロー
 
 ### 盤上の駒を動かす場合
 1. 自分の駒をタップ → 駒が選択される（ハイライト）
@@ -323,7 +432,7 @@ go-go-shogi/
 
 ---
 
-## 9. 検証方法
+## 10. 検証方法
 
 1. **初期配置確認**: 盤面が仕様通りの配置か目視確認
 2. **駒の移動テスト**: 各駒種の移動が正しいか（角・飛の射線ブロック含む）
@@ -333,38 +442,45 @@ go-go-shogi/
 6. **打ち歩詰めテスト**: 歩を打って詰みになる手が禁止されるか
 7. **王手回避テスト**: 王手がかかっている時、回避手のみが合法か
 8. **詰みテスト**: 合法手がない時にゲーム終了するか
-9. **千日手テスト**: 同一局面4回で後手勝ちになるか
-10. **CPU対戦テスト**: CPUが合法手を指し、思考が完了するか
+9. **千日手テスト**: 同一局面4回で設定に応じた結果になるか
+10. **CPU対戦テスト**: CPUが合法手を指し、思考が完了するか（先手/後手両方）
 11. **モバイル操作テスト**: スマホブラウザでタップ操作が正常か
 
 ---
 
-## 10. 作成ファイル一覧
+## 11. 作成ファイル一覧
 
 | ファイル | 役割 |
 |---|---|
-| `go-go-shogi/index.html` | HTMLエントリーポイント |
-| `go-go-shogi/package.json` | 依存関係定義 |
-| `go-go-shogi/vite.config.js` | Vite設定 |
-| `go-go-shogi/src/main.jsx` | Reactエントリーポイント |
-| `go-go-shogi/src/App.jsx` | ルートコンポーネント |
-| `go-go-shogi/src/App.css` | グローバルスタイル |
-| `go-go-shogi/src/components/ModeSelect.jsx` | タイトル画面 |
-| `go-go-shogi/src/components/ModeSelect.css` | タイトル画面スタイル |
-| `go-go-shogi/src/components/Board.jsx` | 盤面描画 |
-| `go-go-shogi/src/components/Board.css` | 盤面スタイル |
-| `go-go-shogi/src/components/Cell.jsx` | マスコンポーネント |
-| `go-go-shogi/src/components/Piece.jsx` | 駒表示 |
-| `go-go-shogi/src/components/Piece.css` | 駒スタイル |
-| `go-go-shogi/src/components/Hand.jsx` | 持ち駒エリア |
-| `go-go-shogi/src/components/Hand.css` | 持ち駒スタイル |
-| `go-go-shogi/src/components/GameInfo.jsx` | 手番表示 |
-| `go-go-shogi/src/components/PromotionDialog.jsx` | 成り確認 |
-| `go-go-shogi/src/components/GameOverDialog.jsx` | 終局画面 |
-| `go-go-shogi/src/components/RulesModal.jsx` | ルール画面 |
-| `go-go-shogi/src/components/RulesModal.css` | ルール画面スタイル |
-| `go-go-shogi/src/game/constants.js` | 定数定義 |
-| `go-go-shogi/src/game/pieces.js` | 駒の移動ロジック |
-| `go-go-shogi/src/game/gameLogic.js` | ゲームルールロジック |
-| `go-go-shogi/src/game/cpu.js` | CPU AI |
-| `go-go-shogi/src/hooks/useGame.js` | ゲーム状態管理 |
+| `index.html` | HTMLエントリーポイント |
+| `package.json` | 依存関係定義 |
+| `vite.config.js` | Vite設定 |
+| `doc/implementation-plan.md` | 本計画書 |
+| `src/main.jsx` | Reactエントリーポイント |
+| `src/App.jsx` | ルートコンポーネント |
+| `src/App.css` | グローバルスタイル |
+| `src/components/ModeSelect.jsx` | タイトル画面 |
+| `src/components/ModeSelect.css` | タイトル画面スタイル |
+| `src/components/CpuSetup.jsx` | CPU対戦設定画面 |
+| `src/components/CpuSetup.css` | CPU対戦設定スタイル |
+| `src/components/RuleSettings.jsx` | ルール設定画面 |
+| `src/components/RuleSettings.css` | ルール設定スタイル |
+| `src/components/Board.jsx` | 盤面描画 |
+| `src/components/Board.css` | 盤面スタイル |
+| `src/components/Cell.jsx` | マスコンポーネント |
+| `src/components/Piece.jsx` | 駒表示（五角形＋明朝体） |
+| `src/components/Piece.css` | 駒スタイル |
+| `src/components/Hand.jsx` | 持ち駒エリア |
+| `src/components/Hand.css` | 持ち駒スタイル |
+| `src/components/GameInfo.jsx` | 手番表示 |
+| `src/components/PromotionDialog.jsx` | 成り確認 |
+| `src/components/GameOverDialog.jsx` | 終局画面 |
+| `src/components/MenuModal.jsx` | メニューモーダル |
+| `src/components/MenuModal.css` | メニューモーダルスタイル |
+| `src/components/RulesModal.jsx` | ルール画面 |
+| `src/components/RulesModal.css` | ルール画面スタイル |
+| `src/game/constants.js` | 定数定義 |
+| `src/game/pieces.js` | 駒の移動ロジック |
+| `src/game/gameLogic.js` | ゲームルールロジック |
+| `src/game/cpu.js` | CPU AI |
+| `src/hooks/useGame.js` | ゲーム状態管理 |
