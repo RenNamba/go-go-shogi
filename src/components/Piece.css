@@ -29,8 +29,8 @@
   padding-top: 15%;
 }
 
-/* 後手: 180度回転 */
-.piece--gote .piece-shape {
+/* 画面上側の駒: 180度回転 */
+.piece--rotated .piece-shape {
   transform: rotate(180deg);
 }
 

@@ -44,6 +44,7 @@ export default function Board({ board, selectedCell, legalMoves, onCellClick, fl
                 }
                 isLegalMove={isLegalMove(row, col)}
                 onClick={() => onCellClick(row, col)}
+                flipped={flipped}
               />
             ))
           )}
