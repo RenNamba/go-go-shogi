@@ -163,6 +163,8 @@ export default function App() {
       {isGameOver && showGameOver && (
         <GameOverDialog
           gameStatus={game.gameStatus}
+          mode={game.mode}
+          playerSide={game.playerSide}
           onClose={() => setShowGameOver(false)}
         />
       )}
