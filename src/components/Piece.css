@@ -1,0 +1,40 @@
+.piece {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.piece-shape {
+  width: 85%;
+  height: 90%;
+  background: linear-gradient(180deg, #f5e6c8 0%, #e8d5a8 50%, #dcc590 100%);
+  clip-path: polygon(50% 0%, 95% 25%, 95% 100%, 5% 100%, 5% 25%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.piece-text {
+  font-family: "Noto Serif JP", "Yu Mincho", "游明朝", serif;
+  font-size: clamp(14px, 4vw, 22px);
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+  padding-top: 15%;
+}
+
+/* 後手: 180度回転 */
+.piece--gote .piece-shape {
+  transform: rotate(180deg);
+}
+
+/* 成り駒: 赤色 */
+.piece--promoted .piece-text {
+  color: #c0392b;
+}

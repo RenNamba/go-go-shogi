@@ -1,121 +1,172 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import useGame from './hooks/useGame.js';
+import ModeSelect from './components/ModeSelect.jsx';
+import CpuSetup from './components/CpuSetup.jsx';
+import RuleSettings from './components/RuleSettings.jsx';
+import Board from './components/Board.jsx';
+import Hand from './components/Hand.jsx';
+import GameInfo from './components/GameInfo.jsx';
+import PromotionDialog from './components/PromotionDialog.jsx';
+import GameOverDialog from './components/GameOverDialog.jsx';
+import MenuModal from './components/MenuModal.jsx';
+import RulesModal from './components/RulesModal.jsx';
+import { GAME_STATUS } from './game/constants.js';
+import './App.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [screen, setScreen] = useState('title');
+  const [showMenu, setShowMenu] = useState(false);
+  const [showRules, setShowRules] = useState(false);
+
+  const game = useGame();
+
+  const handleSelectPvp = () => {
+    game.initGame('pvp');
+    setScreen('game');
+  };
+
+  const handleSelectCpu = () => {
+    setScreen('cpu-setup');
+  };
+
+  const handleCpuStart = (side) => {
+    game.initGame('cpu', side);
+    setScreen('game');
+  };
+
+  const handleRestart = () => {
+    game.initGame(game.mode, game.playerSide);
+    setShowMenu(false);
+  };
+
+  const handleTitle = () => {
+    setScreen('title');
+    setShowMenu(false);
+  };
+
+  // タイトル画面
+  if (screen === 'title') {
+    return (
+      <>
+        <ModeSelect
+          onSelectPvp={handleSelectPvp}
+          onSelectCpu={handleSelectCpu}
+          onOpenRules={() => setShowRules(true)}
+          onOpenSettings={() => setScreen('settings')}
+        />
+        {showRules && <RulesModal onClose={() => setShowRules(false)} />}
+      </>
+    );
+  }
+
+  // CPU設定画面
+  if (screen === 'cpu-setup') {
+    return (
+      <CpuSetup
+        onStart={handleCpuStart}
+        onBack={() => setScreen('title')}
+      />
+    );
+  }
+
+  // ルール設定画面
+  if (screen === 'settings') {
+    return (
+      <RuleSettings
+        rules={game.rules}
+        onChangeRules={game.setRules}
+        onBack={() => setScreen('title')}
+      />
+    );
+  }
+
+  // ゲーム画面
+  const isGameOver = game.gameStatus !== GAME_STATUS.PLAYING;
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="game-screen">
+      {/* ヘッダー */}
+      <header className="game-header">
+        <span className="game-header-title">☗ 5五将棋</span>
+        <div className="game-header-buttons">
+          <button
+            className="header-btn"
+            onClick={() => setShowRules(true)}
+            aria-label="ルール"
+          >
+            ?
+          </button>
+          <button
+            className="header-btn"
+            onClick={() => setShowMenu(true)}
+            aria-label="メニュー"
+          >
+            ≡
+          </button>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      </header>
 
-      <div className="ticks"></div>
+      {/* 後手の持ち駒 */}
+      <Hand
+        player="gote"
+        hand={game.hands.gote}
+        selectedHand={game.currentPlayer === 'gote' ? game.selectedHand : null}
+        onHandClick={(type) => game.onHandClick('gote', type)}
+        label="☖ 後手"
+      />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      {/* 盤面 */}
+      <Board
+        board={game.board}
+        selectedCell={game.selectedCell}
+        legalMoves={game.legalMoves}
+        onCellClick={game.onCellClick}
+      />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {/* 先手の持ち駒 */}
+      <Hand
+        player="sente"
+        hand={game.hands.sente}
+        selectedHand={game.currentPlayer === 'sente' ? game.selectedHand : null}
+        onHandClick={(type) => game.onHandClick('sente', type)}
+        label="☗ 先手"
+      />
+
+      {/* 手番表示 */}
+      <GameInfo
+        currentPlayer={game.currentPlayer}
+        isCheck={game.isCheck}
+        isCpuThinking={game.isCpuThinking}
+      />
+
+      {/* 成り確認ダイアログ */}
+      {game.pendingPromotion && (
+        <PromotionDialog
+          onPromote={() => game.onPromotionAnswer(true)}
+          onDecline={() => game.onPromotionAnswer(false)}
+        />
+      )}
+
+      {/* 終局ダイアログ */}
+      {isGameOver && (
+        <GameOverDialog
+          gameStatus={game.gameStatus}
+          onRestart={handleRestart}
+          onTitle={handleTitle}
+        />
+      )}
+
+      {/* メニューモーダル */}
+      {showMenu && (
+        <MenuModal
+          onRestart={handleRestart}
+          onTitle={handleTitle}
+          onClose={() => setShowMenu(false)}
+        />
+      )}
+
+      {/* ルールモーダル */}
+      {showRules && <RulesModal onClose={() => setShowRules(false)} />}
+    </div>
+  );
 }
-
-export default App

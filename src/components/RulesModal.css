@@ -1,0 +1,65 @@
+.rules-modal {
+  background: #f5f0e1;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: min(90vw, 400px);
+  max-height: 80dvh;
+  overflow-y: auto;
+  border: 2px solid #c8a870;
+  font-family: "Noto Serif JP", "Yu Mincho", "游明朝", serif;
+}
+
+.rules-title {
+  font-size: clamp(18px, 5vw, 24px);
+  color: #3a2a14;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.rules-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rules-content h3 {
+  font-size: clamp(14px, 3.5vw, 17px);
+  color: #5a4a32;
+  border-bottom: 1px solid #d4c4a8;
+  padding-bottom: 4px;
+  margin-bottom: 6px;
+}
+
+.rules-content p,
+.rules-content li,
+.rules-content dd {
+  font-size: clamp(12px, 3vw, 15px);
+  color: #3a2a14;
+  line-height: 1.6;
+}
+
+.rules-content ul {
+  padding-left: 20px;
+}
+
+.rules-pieces {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+}
+
+.rules-pieces dt {
+  font-weight: 700;
+  color: #5a4a32;
+  font-size: clamp(12px, 3vw, 15px);
+}
+
+.rules-pieces dd {
+  margin: 0;
+}
+
+.rules-close-btn {
+  display: block;
+  margin: 16px auto 0;
+  width: 100%;
+}

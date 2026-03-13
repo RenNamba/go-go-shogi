@@ -1,0 +1,61 @@
+.mode-select {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 20px;
+  gap: 40px;
+}
+
+.mode-select-title {
+  font-family: "Noto Serif JP", "Yu Mincho", "游明朝", serif;
+  font-size: clamp(28px, 8vw, 48px);
+  font-weight: 900;
+  color: #3a2a14;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.title-icon {
+  font-size: 0.8em;
+  color: #8b6914;
+}
+
+.mode-select-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(80vw, 280px);
+}
+
+.mode-btn {
+  padding: 14px 24px;
+  font-family: "Noto Serif JP", "Yu Mincho", "游明朝", serif;
+  font-size: clamp(16px, 4vw, 20px);
+  font-weight: 700;
+  color: #3a2a14;
+  background: linear-gradient(180deg, #f5e6c8 0%, #e8d5a8 100%);
+  border: 2px solid #c8a870;
+  border-radius: 8px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+
+.mode-btn:active {
+  background: linear-gradient(180deg, #e8d5a8 0%, #dcc590 100%);
+}
+
+.mode-btn--sub {
+  font-size: clamp(14px, 3.5vw, 17px);
+  padding: 10px 20px;
+  background: linear-gradient(180deg, #faf4e8 0%, #f0e4d0 100%);
+  border-color: #d4c4a8;
+  color: #5a4a32;
+}
+
+.mode-btn--sub:active {
+  background: linear-gradient(180deg, #f0e4d0 0%, #e5d9c0 100%);
+}
