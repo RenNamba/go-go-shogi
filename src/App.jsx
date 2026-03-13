@@ -17,6 +17,7 @@ export default function App() {
   const [screen, setScreen] = useState('title');
   const [showMenu, setShowMenu] = useState(false);
   const [showRules, setShowRules] = useState(false);
+  const [showGameOver, setShowGameOver] = useState(true);
 
   const game = useGame();
 
@@ -37,11 +38,13 @@ export default function App() {
   const handleRestart = () => {
     game.initGame(game.mode, game.playerSide);
     setShowMenu(false);
+    setShowGameOver(true);
   };
 
   const handleTitle = () => {
     setScreen('title');
     setShowMenu(false);
+    setShowGameOver(true);
   };
 
   // タイトル画面
@@ -148,11 +151,10 @@ export default function App() {
       )}
 
       {/* 終局ダイアログ */}
-      {isGameOver && (
+      {isGameOver && showGameOver && (
         <GameOverDialog
           gameStatus={game.gameStatus}
-          onRestart={handleRestart}
-          onTitle={handleTitle}
+          onClose={() => setShowGameOver(false)}
         />
       )}
 
