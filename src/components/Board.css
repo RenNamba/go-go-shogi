@@ -1,0 +1,91 @@
+.board-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.board-col-labels {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  width: min(80vw, 350px);
+  padding: 0 2px;
+}
+
+.board-col-labels .board-label {
+  text-align: center;
+  font-family: "Noto Serif JP", "Yu Mincho", "游明朝", serif;
+  font-size: clamp(10px, 2.5vw, 14px);
+  color: #5a4a32;
+}
+
+.board-with-rows {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  width: min(80vw, 350px);
+  height: min(80vw, 350px);
+  border: 2px solid #8b6914;
+  background: linear-gradient(
+    135deg,
+    #d4a76a 0%,
+    #c8945a 20%,
+    #d4a76a 40%,
+    #cfa065 60%,
+    #d4a76a 80%,
+    #c89858 100%
+  );
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.cell {
+  border: 1px solid #8b6914;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cell--selected {
+  background-color: rgba(76, 175, 80, 0.35);
+}
+
+.cell--legal {
+  cursor: pointer;
+}
+
+.cell-legal-dot {
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background-color: rgba(76, 175, 80, 0.5);
+  position: absolute;
+}
+
+.cell-legal-capture {
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  border: 3px solid rgba(76, 175, 80, 0.5);
+}
+
+.board-row-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 0 4px;
+}
+
+.board-row-labels .board-label {
+  font-family: "Noto Serif JP", "Yu Mincho", "游明朝", serif;
+  font-size: clamp(10px, 2.5vw, 14px);
+  color: #5a4a32;
+}

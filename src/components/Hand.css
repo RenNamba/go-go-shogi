@@ -1,0 +1,66 @@
+.hand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  min-height: 44px;
+  font-family: "Noto Serif JP", "Yu Mincho", "游明朝", serif;
+}
+
+.hand-label {
+  font-size: clamp(12px, 3vw, 16px);
+  font-weight: 700;
+  color: #5a4a32;
+  white-space: nowrap;
+}
+
+.hand-caption {
+  font-size: clamp(11px, 2.5vw, 14px);
+  color: #7a6a52;
+  white-space: nowrap;
+}
+
+.hand-pieces {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.hand-piece {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 4px 8px;
+  border: 1px solid #c8a870;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #f5e6c8, #e8d5a8);
+  cursor: pointer;
+  font-family: "Noto Serif JP", "Yu Mincho", "游明朝", serif;
+  font-size: clamp(13px, 3.5vw, 18px);
+  color: #1a1a1a;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hand-piece:active {
+  background: linear-gradient(180deg, #e8d5a8, #dcc590);
+}
+
+.hand-piece--selected {
+  background: rgba(76, 175, 80, 0.3);
+  border-color: #4caf50;
+}
+
+.hand-piece-name {
+  font-weight: 700;
+}
+
+.hand-piece-count {
+  font-size: 0.75em;
+  color: #5a4a32;
+}
+
+.hand-empty {
+  font-size: clamp(11px, 2.5vw, 14px);
+  color: #a09080;
+}
