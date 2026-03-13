@@ -1,6 +1,6 @@
 import { GAME_STATUS } from '../game/constants.js';
 
-export default function GameOverDialog({ gameStatus, onRestart, onTitle }) {
+export default function GameOverDialog({ gameStatus, onClose }) {
   let message = '';
   if (gameStatus === GAME_STATUS.SENTE_WIN) {
     message = '☗ 先手の勝ち！';
@@ -11,16 +11,13 @@ export default function GameOverDialog({ gameStatus, onRestart, onTitle }) {
   }
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-dialog">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-dialog" onClick={e => e.stopPropagation()}>
         <p className="modal-title">対局終了</p>
         <p className="modal-message modal-message--large">{message}</p>
         <div className="modal-buttons">
-          <button className="modal-btn modal-btn--primary" onClick={onRestart}>
-            もう一度
-          </button>
-          <button className="modal-btn" onClick={onTitle}>
-            タイトルに戻る
+          <button className="modal-btn" onClick={onClose}>
+            閉じる
           </button>
         </div>
       </div>
