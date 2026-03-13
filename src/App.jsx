@@ -85,6 +85,14 @@ export default function App() {
 
   // ゲーム画面
   const isGameOver = game.gameStatus !== GAME_STATUS.PLAYING;
+  // CPU対戦で後手を選んだ場合、盤面を反転（自分を下側にする）
+  const flipped = game.mode === 'cpu' && game.playerSide === 'gote';
+
+  // 画面上側（相手側）と下側（自分側）の持ち駒を決定
+  const topPlayer = flipped ? 'sente' : 'gote';
+  const bottomPlayer = flipped ? 'gote' : 'sente';
+  const topLabel = flipped ? '☗ 先手' : '☖ 後手';
+  const bottomLabel = flipped ? '☖ 後手' : '☗ 先手';
 
   return (
     <div className="game-screen">
@@ -109,13 +117,13 @@ export default function App() {
         </div>
       </header>
 
-      {/* 後手の持ち駒 */}
+      {/* 上側の持ち駒（相手側） */}
       <Hand
-        player="gote"
-        hand={game.hands.gote}
-        selectedHand={game.currentPlayer === 'gote' ? game.selectedHand : null}
-        onHandClick={(type) => game.onHandClick('gote', type)}
-        label="☖ 後手"
+        player={topPlayer}
+        hand={game.hands[topPlayer]}
+        selectedHand={game.currentPlayer === topPlayer ? game.selectedHand : null}
+        onHandClick={(type) => game.onHandClick(topPlayer, type)}
+        label={topLabel}
       />
 
       {/* 盤面 */}
@@ -124,15 +132,16 @@ export default function App() {
         selectedCell={game.selectedCell}
         legalMoves={game.legalMoves}
         onCellClick={game.onCellClick}
+        flipped={flipped}
       />
 
-      {/* 先手の持ち駒 */}
+      {/* 下側の持ち駒（自分側） */}
       <Hand
-        player="sente"
-        hand={game.hands.sente}
-        selectedHand={game.currentPlayer === 'sente' ? game.selectedHand : null}
-        onHandClick={(type) => game.onHandClick('sente', type)}
-        label="☗ 先手"
+        player={bottomPlayer}
+        hand={game.hands[bottomPlayer]}
+        selectedHand={game.currentPlayer === bottomPlayer ? game.selectedHand : null}
+        onHandClick={(type) => game.onHandClick(bottomPlayer, type)}
+        label={bottomLabel}
       />
 
       {/* 手番表示 */}
